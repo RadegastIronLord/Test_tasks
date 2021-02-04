@@ -27,19 +27,59 @@ Project File Date:  02/04/2021
 <h2>Output:</h2>
 *** Using Compiler 'V6.14', folder: 'D:\Keil_v5\ARM\ARMCLANG\Bin'
 Build target 'Target 1'
-assembling startup_stm32f411xe.s...
-compiling system_stm32f4xx.c...
-main.c(65): warning: implicit conversion loses integer precision: 'volatile uint32_t' (aka 'volatile unsigned int') to 'uint8_t' (aka 'unsigned char') [-Wimplicit-int-conversion]
+main.c(27): warning: passing 'const char *' to parameter of type 'uint8_t *' (aka 'unsigned char *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+        UART_TX_str(message_help, 0xff);
+                    ^~~~~~~~~~~~
+main.c(11): note: passing argument to parameter here
+void UART_TX_str(uint8_t *, size_t);
+                          ^
+main.c(84): warning: implicit conversion loses integer precision: 'volatile uint32_t' (aka 'volatile unsigned int') to 'uint8_t' (aka 'unsigned char') [-Wimplicit-int-conversion]
                 c = USART2->DR;
                   ~ ~~~~~~~~^~
-main.c(113): warning: no newline at end of file [-Wnewline-eof]
+main.c(115): warning: passing 'const char *' to parameter of type 'uint8_t *' (aka 'unsigned char *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+        UART_TX_str(message_cmd, 0xff);
+                    ^~~~~~~~~~~
+main.c(102): note: passing argument to parameter 'data' here
+void UART_TX_str(uint8_t *data, size_t num) {
+                          ^
+main.c(117): warning: passing 'const char *' to parameter of type 'uint8_t *' (aka 'unsigned char *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+        UART_TX_str(message_ACK, 0xff);
+                    ^~~~~~~~~~~
+main.c(102): note: passing argument to parameter 'data' here
+void UART_TX_str(uint8_t *data, size_t num) {
+                          ^
+main.c(120): warning: passing 'const char *' to parameter of type 'uint8_t *' (aka 'unsigned char *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+                        UART_TX_str(message_help, 0xff);
+                                    ^~~~~~~~~~~~
+main.c(102): note: passing argument to parameter 'data' here
+void UART_TX_str(uint8_t *data, size_t num) {
+                          ^
+main.c(122): warning: passing 'const char *' to parameter of type 'uint8_t *' (aka 'unsigned char *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+                        UART_TX_str(message_err, 0xff);
+                                    ^~~~~~~~~~~
+main.c(102): note: passing argument to parameter 'data' here
+void UART_TX_str(uint8_t *data, size_t num) {
+                          ^
+main.c(125): warning: passing 'const char *' to parameter of type 'uint8_t *' (aka 'unsigned char *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+                UART_TX_str(message_err, 0xff);
+                            ^~~~~~~~~~~
+main.c(102): note: passing argument to parameter 'data' here
+void UART_TX_str(uint8_t *data, size_t num) {
+                          ^
+main.c(136): warning: passing 'const char *' to parameter of type 'uint8_t *' (aka 'unsigned char *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+                                UART_TX_str(message_err, 0xff);
+                                            ^~~~~~~~~~~
+main.c(102): note: passing argument to parameter 'data' here
+void UART_TX_str(uint8_t *data, size_t num) {
+                          ^
+main.c(140): warning: no newline at end of file [-Wnewline-eof]
 }
  ^
-2 warnings generated.
+9 warnings generated.
 compiling main.c...
 linking...
-Program Size: Code=880 RO-data=424 RW-data=0 ZI-data=1672  
-".\Objects\RTC.axf" - 0 Error(s), 2 Warning(s).
+Program Size: Code=1056 RO-data=572 RW-data=0 ZI-data=1672  
+".\Objects\RTC.axf" - 0 Error(s), 9 Warning(s).
 
 <h2>Software Packages used:</h2>
 

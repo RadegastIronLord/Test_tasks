@@ -3,9 +3,9 @@
 <title>Static Call Graph - [.\Objects\RTC.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\RTC.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6140002: Last Updated: Thu Feb  4 11:01:49 2021
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6140002: Last Updated: Thu Feb  4 11:28:08 2021
 <BR><P>
-<H3>Maximum Stack Usage =         24 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =         32 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
 __rt_entry_main &rArr; main &rArr; CMD_Handler &rArr; UART_TX_str
 <P>
@@ -214,7 +214,7 @@ Global Symbols
 <P><STRONG><a name="[7d]"></a>__rt_entry_postsh_1</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$00000009))
 
 <P><STRONG><a name="[4e]"></a>__rt_entry_main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$0000000D))
-<BR><BR>[Stack]<UL><LI>Max Depth = 24 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 32 + Unknown Stack Size
 <LI>Call Chain = __rt_entry_main &rArr; main &rArr; CMD_Handler &rArr; UART_TX_str
 </UL>
 <BR>[Calls]<UL><LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit
@@ -522,8 +522,8 @@ Global Symbols
 
 <P><STRONG><a name="[87]"></a>__semihosting_library_function</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, indicate_semi.o(.text), UNUSED)
 
-<P><STRONG><a name="[58]"></a>CMD_Handler</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, main.o(.text.CMD_Handler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = CMD_Handler &rArr; UART_TX_str
+<P><STRONG><a name="[58]"></a>CMD_Handler</STRONG> (Thumb, 192 bytes, Stack size 16 bytes, main.o(.text.CMD_Handler))
+<BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = CMD_Handler &rArr; UART_TX_str
 </UL>
 <BR>[Calls]<UL><LI><a href="#[59]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_TX_str
 </UL>
@@ -549,21 +549,23 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[59]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_TX_str
 </UL>
 
-<P><STRONG><a name="[59]"></a>UART_TX_str</STRONG> (Thumb, 26 bytes, Stack size 16 bytes, main.o(.text.UART_TX_str))
+<P><STRONG><a name="[59]"></a>UART_TX_str</STRONG> (Thumb, 30 bytes, Stack size 16 bytes, main.o(.text.UART_TX_str))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = UART_TX_str
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_TX_byte
 </UL>
-<BR>[Called By]<UL><LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
+<BR>[Called By]<UL><LI><a href="#[4f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
+<LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
 <P><STRONG><a name="[2c]"></a>USART2_IRQHandler</STRONG> (Thumb, 88 bytes, Stack size 0 bytes, main.o(.text.USART2_IRQHandler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f411xe.o(RESET)
 </UL>
-<P><STRONG><a name="[4f]"></a>main</STRONG> (Thumb, 50 bytes, Stack size 0 bytes, main.o(.text.main))
-<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = main &rArr; CMD_Handler &rArr; UART_TX_str
+<P><STRONG><a name="[4f]"></a>main</STRONG> (Thumb, 62 bytes, Stack size 0 bytes, main.o(.text.main))
+<BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = main &rArr; CMD_Handler &rArr; UART_TX_str
 </UL>
-<BR>[Calls]<UL><LI><a href="#[5a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART2_init
+<BR>[Calls]<UL><LI><a href="#[59]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_TX_str
+<LI><a href="#[5a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART2_init
 <LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Clock_init
 <LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
