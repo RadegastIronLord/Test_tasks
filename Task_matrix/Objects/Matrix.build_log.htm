@@ -27,14 +27,23 @@ Project File Date:  02/04/2021
 <h2>Output:</h2>
 *** Using Compiler 'V6.14', folder: 'D:\Keil_v5\ARM\ARMCLANG\Bin'
 Build target 'Target 1'
-main.c(64): warning: implicit conversion loses integer precision: 'volatile uint32_t' (aka 'volatile unsigned int') to 'uint8_t' (aka 'unsigned char') [-Wimplicit-int-conversion]
+main.c(65): warning: implicit conversion loses integer precision: 'volatile uint32_t' (aka 'volatile unsigned int') to 'uint8_t' (aka 'unsigned char') [-Wimplicit-int-conversion]
                 c = USART2->DR;
                   ~ ~~~~~~~~^~
-1 warning generated.
+main.c(97): warning: comparing floating point with == or != is unsafe [-Wfloat-equal]
+        return i_root == root;
+               ~~~~~~ ^  ~~~~
+main.c(103): warning: implicit conversion turns floating-point number into integer: 'double' to 'uint32_t' (aka 'unsigned int') [-Wfloat-conversion]
+                uint32_t root = sqrt(cnt);
+                         ~~~~   ^~~~~~~~~
+main.c(113): warning: implicit conversion turns floating-point number into integer: 'double' to 'uint32_t' (aka 'unsigned int') [-Wfloat-conversion]
+                uint32_t root = sqrt(cnt/2);
+                         ~~~~   ^~~~~~~~~~~
+4 warnings generated.
 compiling main.c...
 linking...
-Program Size: Code=864 RO-data=424 RW-data=0 ZI-data=1656  
-".\Objects\Matrix.axf" - 0 Error(s), 1 Warning(s).
+Program Size: Code=2432 RO-data=424 RW-data=0 ZI-data=1672  
+".\Objects\Matrix.axf" - 0 Error(s), 4 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -60,12 +69,12 @@ Package Vendor: Keil
    * Component: ARM::CMSIS:CORE:5.4.0
 
    * Component: Keil::Device:Startup:2.6.3
-      Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\arm\startup_stm32f411xe.s
-      Include file:  Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h
-      Source file:   MDK\Device\Source\ARM\STM32F4xx_OTP.s
       Source file:   MDK\Device\Source\ARM\STM32F411xx_OPT.s
+      Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\arm\startup_stm32f411xe.s
+      Source file:   MDK\Device\Source\ARM\STM32F4xx_OTP.s
+      Include file:  Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h
       Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\system_stm32f4xx.c
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:00
 </pre>
 </body>
 </html>

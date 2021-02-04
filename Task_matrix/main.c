@@ -1,6 +1,7 @@
 #include "stm32f411xe.h"
 #include <stdlib.h> 
 #include <stdbool.h>
+#include <math.h>
 
 void Clock_init(void);
 void Dummy_delay(uint16_t);
@@ -11,7 +12,7 @@ void UART_TX_str(uint8_t *, size_t);
 void CMD_Handler(void);
 
 
-static uint8_t buf[16];
+static uint8_t buf[32];
 volatile static size_t cnt = 0;
 
 void Clock_init(void) {
@@ -89,8 +90,36 @@ void Dummy_delay(uint16_t t) {
 	for(size_t i = 0; i < t; ++i)
 		__ASM("NOP");
 }
+
+static bool is_square(size_t num){
+	double root = sqrt(num);
+	uint32_t i_root = (uint32_t)root;
+	return i_root == root;
+}
+
 void CMD_Handler() {
-	UART_TX_str(buf, cnt);
+	//UART_TX_str(buf, cnt);
+	if(is_square(cnt)){
+		uint32_t root = sqrt(cnt);
+		for(size_t i = 0; i < root; ++i){
+			for(size_t j = i * root; j < (i + 1) * root; ++j){
+				UART_TX_byte(buf[j]);
+				UART_TX_byte(' ');
+			}
+			UART_TX_byte('\n');
+		}
+	}
+	else if(is_square(cnt/2)){
+		uint32_t root = sqrt(cnt/2);
+		for(size_t i = 0; i < root; ++i){
+			for(size_t j = 2 * i * root; j < (2 * (i+1) * root) - 1; j += 2){
+				UART_TX_byte(buf[j]);
+				UART_TX_byte(buf[j+1]);
+				UART_TX_byte(' ');
+			}
+			UART_TX_byte('\n');
+		}
+	}
 	cnt = 0;
 }
 
@@ -99,6 +128,7 @@ int main() {
 	__enable_irq ();
 	Clock_init();
 	UART2_init();
+	GPIOA->MODER |= 0x1 << GPIO_MODER_MODE5_Pos;
 	while(1){
 		if(transfer_completed) {
 			transfer_completed = false;
