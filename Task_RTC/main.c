@@ -30,6 +30,7 @@ int main() {
 	__enable_irq ();
 	Clock_init();
 	UART2_init();
+	RTC_init();
 	UART_TX_str(message_help, 0xff);
 	GPIOA->MODER |= 0x1 << GPIO_MODER_MODE5_Pos;
 	while(1){
@@ -41,7 +42,12 @@ int main() {
 }
 
 void RTC_init(){
-	
+	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+	PWR->CR |= PWR_CR_DBP;
+	RCC->BDCR |= RCC_BDCR_LSEON;  
+	while (!(RCC->BDCR & RCC_BDCR_LSEON)){} 
+	RCC->BDCR |= 0x1 << RCC_BDCR_RTCSEL_Pos;
+	RCC->BDCR |= RCC_BDCR_RTCEN;
 }
 
 void Clock_init(void) {
@@ -157,12 +163,12 @@ void RTC_set_time(uint8_t ht, uint8_t hu, uint8_t mt, uint8_t mu, uint8_t st, ui
 	RTC->ISR |= RTC_ISR_INIT;
 	while( !(RTC->ISR & RTC_ISR_INITF) ){} 
 		
-	RTC->TR = ht << RTC_TR_HT_Pos
-					| hu << RTC_TR_HU_Pos
-					| mt << RTC_TR_MNT_Pos
-					| mu << RTC_TR_MNU_Pos
-					| st << RTC_TR_ST_Pos
-					| su << RTC_TR_SU_Pos;
+	RTC->TR = (ht & 0xF) << RTC_TR_HT_Pos
+					| (hu & 0xF) << RTC_TR_HU_Pos
+					| (mt & 0xF) << RTC_TR_MNT_Pos
+					| (mu & 0xF) << RTC_TR_MNU_Pos
+					| (st & 0xF) << RTC_TR_ST_Pos
+					| (su & 0xF) << RTC_TR_SU_Pos;
 
 	RTC->ISR &= ~(RTC_ISR_INIT);
 	RTC->WPR = 0xFF;
@@ -175,12 +181,12 @@ void RTC_set_alarmA(uint8_t ht, uint8_t hu, uint8_t mt, uint8_t mu, uint8_t st, 
 	while( !(RTC->ISR & RTC_ISR_INITF) ){} 
 		
 	RTC->ALRMAR = RTC_ALRMAR_MSK4
-							| ht << RTC_ALRMAR_HT_Pos
-							| hu << RTC_ALRMAR_HU_Pos
-							| mt << RTC_ALRMAR_MNT_Pos
-							| mu << RTC_ALRMAR_MNU_Pos
-							| st << RTC_ALRMAR_ST_Pos
-							| su << RTC_ALRMAR_SU_Pos;
+							| (ht & 0xF) << RTC_ALRMAR_HT_Pos
+							| (hu & 0xF) << RTC_ALRMAR_HU_Pos
+							| (mt & 0xF) << RTC_ALRMAR_MNT_Pos
+							| (mu & 0xF) << RTC_ALRMAR_MNU_Pos
+							| (st & 0xF) << RTC_ALRMAR_ST_Pos
+							| (su & 0xF) << RTC_ALRMAR_SU_Pos;
 
 	RTC->ISR &= ~(RTC_ISR_INIT);
 	RTC->WPR = 0xFF;
@@ -193,12 +199,12 @@ void RTC_set_alarmB(uint8_t ht, uint8_t hu, uint8_t mt, uint8_t mu, uint8_t st, 
 	while( !(RTC->ISR & RTC_ISR_INITF) ){} 
 		
 	RTC->ALRMBR = RTC_ALRMBR_MSK4
-							| ht << RTC_ALRMBR_HT_Pos
-							| hu << RTC_ALRMBR_HU_Pos
-							| mt << RTC_ALRMBR_MNT_Pos
-							| mu << RTC_ALRMBR_MNU_Pos
-							| st << RTC_ALRMBR_ST_Pos
-							| su << RTC_ALRMBR_SU_Pos;
+							| (ht & 0xF) << RTC_ALRMBR_HT_Pos
+							| (hu & 0xF) << RTC_ALRMBR_HU_Pos
+							| (mt & 0xF) << RTC_ALRMBR_MNT_Pos
+							| (mu & 0xF) << RTC_ALRMBR_MNU_Pos
+							| (st & 0xF) << RTC_ALRMBR_ST_Pos
+							| (su & 0xF) << RTC_ALRMBR_SU_Pos;
 
 	RTC->ISR &= ~(RTC_ISR_INIT);
 	RTC->WPR = 0xFF;
