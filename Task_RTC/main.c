@@ -16,15 +16,19 @@ void RTC_set_alarmA(uint8_t ht, uint8_t hu, uint8_t mt, uint8_t mu, uint8_t st, 
 void RTC_set_alarmB(uint8_t ht, uint8_t hu, uint8_t mt, uint8_t mu, uint8_t st, uint8_t su);
 void RTC_get_time(void);
 
+void RTC_WKUP_IRQHandler(void);
+void RTC_Alarm_IRQHandler(void);
+
 static uint8_t buf[32];
 static uint8_t time[8];
 volatile static size_t cnt = 0;
 volatile static bool transfer_completed = false;
 
-static const char* message_help = "Available commands\nstHHMMSS - set time HH:MM:SS\nsaHHMMSS - set time LEDON HH:MM:SS\nsbHHMMSS - set time LEDOFF HH:MM:SS\n";
+static const char* message_help = "Available commands\nstHHMMSS - set time HH:MM:SS\nsaHHMMSS - set time LEDON HH:MM:SS\nsbHHMMSS - set time LEDOFF HH:MM:SS\ngt - get current time\n";
 static const char* message_cmd = "Command ";
 static const char* message_ACK = " received\n";
 static const char* message_err = "Command not recognized!\n";
+static const char* message_time = "Current time:\n";
 
 int main() {
 	__enable_irq ();
@@ -48,6 +52,66 @@ void RTC_init(){
 	while (!(RCC->BDCR & RCC_BDCR_LSEON)){} 
 	RCC->BDCR |= 0x1 << RCC_BDCR_RTCSEL_Pos;
 	RCC->BDCR |= RCC_BDCR_RTCEN;
+	RTC_set_time(1,2,0,0,0,0);
+	RTC_get_time();
+	
+	RTC->WPR = 0xCA;
+	RTC->WPR = 0x53;
+	RTC->ISR |= RTC_ISR_INIT;
+	while( !(RTC->ISR & RTC_ISR_INITF) ){} 		
+		
+	// configure exti22 for wkup
+	EXTI->IMR |= EXTI_IMR_IM22;
+	EXTI->RTSR |= EXTI_RTSR_TR22;
+	// configure exti17 for alarm
+	EXTI->IMR |= EXTI_IMR_IM17;
+	EXTI->RTSR |= EXTI_RTSR_TR17;	
+	// NVIC 
+	NVIC_EnableIRQ(RTC_WKUP_IRQn);
+	NVIC_EnableIRQ(RTC_Alarm_IRQn);
+		
+	// Setup WKUP
+	RTC->CR &= ~ RTC_CR_WUTE;
+	while(!(RTC->ISR & RTC_ISR_WUTWF));
+	RTC->CR |= 0x4 << RTC_CR_WUCKSEL_Pos;
+	RTC->WUTR = 0;
+	RTC->CR |= RTC_CR_WUTE;         
+  RTC->CR |= RTC_CR_WUTIE;
+		
+	// Setup alarm
+	RTC->CR &= ~ RTC_CR_ALRAE;
+	while(!(RTC->ISR & RTC_ISR_ALRAWF));
+	RTC->CR |= RTC_CR_ALRAIE;	
+	RTC->CR |= RTC_CR_ALRAE;
+	RTC->CR &= ~ RTC_CR_ALRBE;
+	while(!(RTC->ISR & RTC_ISR_ALRBWF));
+	RTC->CR |= RTC_CR_ALRBIE;	
+	RTC->CR |= RTC_CR_ALRBE;
+	
+	RTC->ISR &= ~(RTC_ISR_INIT);
+	RTC->WPR = 0xFF;	
+}
+
+void RTC_WKUP_IRQHandler() {
+	RTC->ISR &= ~RTC_ISR_WUTF;
+	EXTI->PR |= 0x1 << EXTI_PR_PR22_Pos;
+	RTC_get_time();
+	UART_TX_str(message_time, 0xff);
+	UART_TX_str(time, 8);
+	UART_TX_byte('\n');
+}
+
+void RTC_Alarm_IRQHandler() {
+	if(RTC->ISR & RTC_ISR_ALRAF) {
+		RTC->ISR &= ~RTC_ISR_ALRAF;
+		GPIOA->BSRR |= 0x20;
+		EXTI->PR |= 0x1 << EXTI_PR_PR17_Pos;
+	}
+	else{
+		RTC->ISR &= ~RTC_ISR_ALRBF;
+		GPIOA->BSRR |= 0x20 << 16;
+		EXTI->PR |= 0x1 << EXTI_PR_PR17_Pos;
+	}
 }
 
 void Clock_init(void) {
@@ -127,12 +191,18 @@ void Dummy_delay(uint16_t t) {
 
 
 void CMD_Handler() {
-	UART_TX_str(message_cmd, 0xff);
+	/*UART_TX_str(message_cmd, 0xff);
 	UART_TX_str(buf, cnt);
-	UART_TX_str(message_ACK, 0xff);
+	UART_TX_str(message_ACK, 0xff);*/
 	if(cnt != 8) {
 		if(buf[0] == 'h' && buf[1] == 'e' && buf[2] == 'l' &&buf[3] == 'p') 
 			UART_TX_str(message_help, 0xff);
+		else if (buf[0] == 'g' && buf[1] == 't'){
+			RTC_get_time();
+			UART_TX_str(message_time, 0xff);
+			UART_TX_str(time, 8);
+			UART_TX_byte('\n');
+		}
 		else
 			UART_TX_str(message_err, 0xff);
 	}
@@ -179,6 +249,8 @@ void RTC_set_alarmA(uint8_t ht, uint8_t hu, uint8_t mt, uint8_t mu, uint8_t st, 
 	RTC->WPR = 0x53;
 	RTC->ISR |= RTC_ISR_INIT;
 	while( !(RTC->ISR & RTC_ISR_INITF) ){} 
+	RTC->CR &= ~RTC_CR_ALRAE;
+	while( !(RTC->ISR & RTC_ISR_ALRAWF) ){}
 		
 	RTC->ALRMAR = RTC_ALRMAR_MSK4
 							| (ht & 0xF) << RTC_ALRMAR_HT_Pos
@@ -187,7 +259,7 @@ void RTC_set_alarmA(uint8_t ht, uint8_t hu, uint8_t mt, uint8_t mu, uint8_t st, 
 							| (mu & 0xF) << RTC_ALRMAR_MNU_Pos
 							| (st & 0xF) << RTC_ALRMAR_ST_Pos
 							| (su & 0xF) << RTC_ALRMAR_SU_Pos;
-
+	RTC->CR |= RTC_CR_ALRAE;
 	RTC->ISR &= ~(RTC_ISR_INIT);
 	RTC->WPR = 0xFF;
 }
@@ -196,7 +268,9 @@ void RTC_set_alarmB(uint8_t ht, uint8_t hu, uint8_t mt, uint8_t mu, uint8_t st, 
 	RTC->WPR = 0xCA;
 	RTC->WPR = 0x53;
 	RTC->ISR |= RTC_ISR_INIT;
-	while( !(RTC->ISR & RTC_ISR_INITF) ){} 
+	while( !(RTC->ISR & RTC_ISR_INITF) ){}
+	RTC->CR &= ~RTC_CR_ALRBE;
+	while( !(RTC->ISR & RTC_ISR_ALRBWF) ){}		
 		
 	RTC->ALRMBR = RTC_ALRMBR_MSK4
 							| (ht & 0xF) << RTC_ALRMBR_HT_Pos
@@ -205,18 +279,18 @@ void RTC_set_alarmB(uint8_t ht, uint8_t hu, uint8_t mt, uint8_t mu, uint8_t st, 
 							| (mu & 0xF) << RTC_ALRMBR_MNU_Pos
 							| (st & 0xF) << RTC_ALRMBR_ST_Pos
 							| (su & 0xF) << RTC_ALRMBR_SU_Pos;
-
+	RTC->CR |= RTC_CR_ALRBE;
 	RTC->ISR &= ~(RTC_ISR_INIT);
 	RTC->WPR = 0xFF;
 }
 
 void RTC_get_time(void){
-	time[0] = 0x30 | RTC->TR >> RTC_TR_HT_Pos;
-	time[1] = 0x30 | RTC->TR >> RTC_TR_HU_Pos;
-	time[3] = 0x30 | RTC->TR >> RTC_TR_MNT_Pos;
-	time[4] = 0x30 | RTC->TR >> RTC_TR_MNU_Pos;
-	time[6] = 0x30 | RTC->TR >> RTC_TR_ST_Pos;
-	time[7] = 0x30 | RTC->TR >> RTC_TR_SU_Pos;
+	time[0] = 0x30 | ((RTC->TR & RTC_TR_HT_Msk) >> RTC_TR_HT_Pos);
+	time[1] = 0x30 | ((RTC->TR & RTC_TR_HU_Msk) >> RTC_TR_HU_Pos);
+	time[3] = 0x30 | ((RTC->TR & RTC_TR_MNT_Msk) >> RTC_TR_MNT_Pos);
+	time[4] = 0x30 | ((RTC->TR & RTC_TR_MNU_Msk) >> RTC_TR_MNU_Pos);
+	time[6] = 0x30 | ((RTC->TR & RTC_TR_ST_Msk) >> RTC_TR_ST_Pos);
+	time[7] = 0x30 | ((RTC->TR & RTC_TR_SU_Msk) >> RTC_TR_SU_Pos);
 	time[2] = ':';
 	time[5] = ':';
 }
