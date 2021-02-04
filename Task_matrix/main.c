@@ -1,5 +1,6 @@
 #include "stm32f411xe.h"
 #include <stdlib.h> 
+#include <stdbool.h>
 
 void Clock_init(void);
 void Dummy_delay(uint16_t);
@@ -8,11 +9,10 @@ void USART2_IRQHandler(void);
 void UART_TX_byte(uint8_t);
 void UART_TX_str(uint8_t *, size_t);
 void CMD_Handler(void);
-void PWM_init(void);
-void PWM_duty(float);
+
 
 static uint8_t buf[16];
-static size_t cnt = 0;
+volatile static size_t cnt = 0;
 
 void Clock_init(void) {
 	RCC->PLLCFGR &= ~RCC_PLLCFGR_PLLSRC; // set PLLsrc as HSI 16 MHz
@@ -55,6 +55,8 @@ void UART2_init(void) {
 	NVIC_EnableIRQ(USART2_IRQn);
 }
 
+
+volatile static bool transfer_completed = false;
 void USART2_IRQHandler() {
 	uint8_t c;
 	if(USART2->SR & USART_SR_RXNE_Msk){
@@ -63,6 +65,9 @@ void USART2_IRQHandler() {
 		if(c != 0x0A && c != 0x0D) {
 			buf[cnt] = c;
 			cnt++;
+		}
+		if(c == 0xA){
+			transfer_completed = true;
 		}
 	}
 	USART2->SR &= 0;
@@ -84,53 +89,20 @@ void Dummy_delay(uint16_t t) {
 	for(size_t i = 0; i < t; ++i)
 		__ASM("NOP");
 }
-static float duty;
 void CMD_Handler() {
-	// Read PWM duty
-	char duty_str[9];
-	for(size_t i = 0; i < 8; ++i) {
-		duty_str[i] = (char)buf[i];
-	}
-	duty_str[8] = '\0';
-	duty = (float)atof(duty_str);
-	PWM_duty(duty);
+	UART_TX_str(buf, cnt);
+	cnt = 0;
 }
 
-void PWM_init() {
-	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-	
-	GPIOA->OTYPER |= 0x0 << GPIO_OTYPER_OT5_Pos;
-	GPIOA->OSPEEDR |= 0x3 << GPIO_OSPEEDR_OSPEED5_Pos;
-	GPIOA->AFR[0] |= 0x1 << GPIO_AFRL_AFSEL5_Pos;
-	GPIOA->MODER |= 0x00000800;
-	
-	TIM2->ARR = 0xFFF;
-	TIM2->PSC = 0;
-	TIM2->CCR1 = 0x3FF;
-	TIM2->CCMR1 |= 0x6 << TIM_CCMR1_OC1M_Pos;
-	TIM2->CCER |= TIM_CCER_CC1E;
-	TIM2->CR1 |= TIM_CR1_CEN;	
-}
-
-void PWM_duty(float d) {
-	TIM2->CR1 &= ~TIM_CR1_CEN;
-	uint32_t cycle = TIM2->ARR;
-	cycle *= d;
-	TIM2->CCR1 = cycle;
-	TIM2->CR1 |= TIM_CR1_CEN;	
-}
 
 int main() {
 	__enable_irq ();
 	Clock_init();
 	UART2_init();
-	PWM_init();
 	while(1){
-		if(cnt >= 8) {
-			cnt = 0;
+		if(transfer_completed) {
+			transfer_completed = false;
 			CMD_Handler();
-			cnt = 0;
 		}
 	}
 }

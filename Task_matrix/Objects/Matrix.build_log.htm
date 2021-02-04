@@ -21,29 +21,20 @@ Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V3.0.7.0
 Dialog DLL:      TCM.DLL V1.46.0.0
  
 <h2>Project:</h2>
-D:\ARM_projects\Keil\Task3_PWM\PWM.uvprojx
-Project File Date:  02/03/2021
+D:\ARM_projects\Keil\Task3_PWM\Test_tasks\Task_matrix\Matrix.uvprojx
+Project File Date:  02/04/2021
 
 <h2>Output:</h2>
 *** Using Compiler 'V6.14', folder: 'D:\Keil_v5\ARM\ARMCLANG\Bin'
 Build target 'Target 1'
-main.c(62): warning: implicit conversion loses integer precision: 'volatile uint32_t' (aka 'volatile unsigned int') to 'uint8_t' (aka 'unsigned char') [-Wimplicit-int-conversion]
+main.c(64): warning: implicit conversion loses integer precision: 'volatile uint32_t' (aka 'volatile unsigned int') to 'uint8_t' (aka 'unsigned char') [-Wimplicit-int-conversion]
                 c = USART2->DR;
                   ~ ~~~~~~~~^~
-main.c(119): warning: implicit conversion turns floating-point number into integer: 'float' to 'uint32_t' (aka 'unsigned int') [-Wfloat-conversion]
-        cycle *= d;
-        ~~~~~~^~~~
-main.c(87): warning: no previous extern declaration for non-static variable 'duty' [-Wmissing-variable-declarations]
-float duty;
-      ^
-main.c(87): note: declare 'static' if the variable is not intended to be used outside of this translation unit
-float duty;
-^
-3 warnings generated.
+1 warning generated.
 compiling main.c...
 linking...
-Program Size: Code=8192 RO-data=888 RW-data=0 ZI-data=1656  
-".\Objects\PWM.axf" - 0 Error(s), 3 Warning(s).
+Program Size: Code=864 RO-data=424 RW-data=0 ZI-data=1656  
+".\Objects\Matrix.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -74,7 +65,7 @@ Package Vendor: Keil
       Source file:   MDK\Device\Source\ARM\STM32F4xx_OTP.s
       Source file:   MDK\Device\Source\ARM\STM32F411xx_OPT.s
       Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\system_stm32f4xx.c
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>
